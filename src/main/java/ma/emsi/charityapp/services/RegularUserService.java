@@ -11,4 +11,5 @@ public interface RegularUserService {
     RegularUser update(Long id, RegularUser regularUser);
     RegularUser findByEmail(String email);
     List<RegularUser> getAll();
+    List voirHistDesDons(Long id);
 }

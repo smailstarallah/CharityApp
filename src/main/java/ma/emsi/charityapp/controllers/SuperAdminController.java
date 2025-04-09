@@ -44,11 +44,16 @@ public class SuperAdminController {
         }
     }
 
+//    @PostMapping("/save")
+//    SuperAdmin save(@Valid @RequestBody SuperAdmin superAdmin) {
+////        int random = (int) (Math.random() * 10000000);
+////        SuperAdmin superAdmin = new SuperAdmin("a", "a", "aaaa"+ (char)(random % 100) + ( (char) (int) (Math.random() * 100))  , random, new java.util.Date(1999, 4, 12), "a");
+//        return superAdminService.save(superAdmin);
+//    }
+
     @PostMapping("/save")
-    SuperAdmin save(@Valid @RequestBody SuperAdmin superAdmin) {
-//        int random = (int) (Math.random() * 10000000);
-//        SuperAdmin superAdmin = new SuperAdmin("a", "a", "aaaa"+ (char)(random % 100) + ( (char) (int) (Math.random() * 100))  , random, new java.util.Date(1999, 4, 12), "a");
-        return superAdminService.save(superAdmin);
+    SuperAdmin save(@Valid @RequestBody SuperAdmin regularUser) {
+        return superAdminService.save(regularUser);
     }
 
     @PutMapping("/update/{id}")

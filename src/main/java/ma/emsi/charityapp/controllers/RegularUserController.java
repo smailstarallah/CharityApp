@@ -43,7 +43,6 @@ public class RegularUserController {
             regularUserService.deleteById(id);
             return "done";
         } catch (Exception e) {
-            e.printStackTrace();
             return "error dans la suppression de User";
         }
     }

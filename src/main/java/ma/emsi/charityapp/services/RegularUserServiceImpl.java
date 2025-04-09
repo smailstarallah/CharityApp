@@ -68,4 +68,9 @@ public class RegularUserServiceImpl implements RegularUserService {
         return regularUserRepository.findAll();
     }
 
+    @Override
+    public List voirHistDesDons(Long id) {
+        return regularUserRepository.findOrganizationByIdsa(id);
+    }
+
 }

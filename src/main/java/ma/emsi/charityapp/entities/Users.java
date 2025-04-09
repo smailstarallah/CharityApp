@@ -13,6 +13,7 @@ import java.util.Date;
 @lombok.AllArgsConstructor(access = lombok.AccessLevel.PROTECTED)
 @lombok.NoArgsConstructor
 @MappedSuperclass
+
 public abstract class Users {
     @NotBlank(message = "Le nom est obligatoire")
     private String nom;
