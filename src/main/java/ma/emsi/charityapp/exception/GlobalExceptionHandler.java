@@ -37,7 +37,6 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handleGenericException(Exception ex) {
         System.err.println("An error occurred in GlobalExceptionHandler: " + ex.getMessage());
-        ex.printStackTrace();
-        return new ResponseEntity<>("An unexpected error occurredd: " + ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>("An unexpected error occurred: " + ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

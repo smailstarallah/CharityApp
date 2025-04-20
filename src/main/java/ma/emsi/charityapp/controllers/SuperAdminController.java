@@ -1,11 +1,13 @@
 package ma.emsi.charityapp.controllers;
 
 
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
+import ma.emsi.charityapp.Enum.OrganizationStatus;
 import ma.emsi.charityapp.entities.SuperAdmin;
+import ma.emsi.charityapp.services.OrganizationService;
 import ma.emsi.charityapp.services.SuperAdminService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -13,8 +15,14 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/superadmin")
 public class SuperAdminController {
-    @Autowired
+
+    private final OrganizationService organizationService;
     SuperAdminService superAdminService;
+
+    public SuperAdminController(SuperAdminService superAdminService, OrganizationService organizationService) {
+        this.superAdminService = superAdminService;
+        this.organizationService = organizationService;
+    }
 
     @GetMapping("")
     List<SuperAdmin> getAll() {
@@ -59,5 +67,18 @@ public class SuperAdminController {
     @PutMapping("/update/{id}")
     SuperAdmin update(@PathVariable Long id,@Valid @RequestBody SuperAdmin superAdmin) {
         return superAdminService.update(id, superAdmin);
+    }
+
+    @PutMapping("/update/{id}/approve/{orgId}")
+    @Transactional
+    String approveOrganization(@PathVariable Long id, @PathVariable Long orgId) {
+        if (organizationService.findById(orgId).get().getStatus() == OrganizationStatus.Approved) {
+            return "already approved";
+        }
+        if(id == null || orgId == null || id <= 0 || orgId <= 0) {
+            return "id or orgId cannot be null";
+        }
+        superAdminService.approveOrganization(id, orgId);
+        return "done";
     }
 }

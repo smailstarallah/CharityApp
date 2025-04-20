@@ -1,5 +1,6 @@
 package ma.emsi.charityapp.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import ma.emsi.charityapp.Enum.MediaType;
 
@@ -13,5 +14,7 @@ public class Media {
     private MediaType type;
     private String url;
     @ManyToOne
+    @JoinColumn(name = "charity_action_id")
+    @JsonIgnore
     private CharityAction charityAction;
 }

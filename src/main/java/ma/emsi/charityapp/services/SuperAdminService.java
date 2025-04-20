@@ -2,6 +2,8 @@ package ma.emsi.charityapp.services;
 
 import ma.emsi.charityapp.entities.Organization;
 import ma.emsi.charityapp.entities.SuperAdmin;
+import org.springframework.web.bind.annotation.PathVariable;
+
 import java.util.List;
 
 public interface SuperAdminService {
@@ -11,5 +13,5 @@ public interface SuperAdminService {
     SuperAdmin update(Long id, SuperAdmin superAdmin);
     SuperAdmin findByEmail(String email);
     List<SuperAdmin> getAll();
-    void approveOrganization(Organization organization);
+    void approveOrganization( Long id, Long orgId);
 }

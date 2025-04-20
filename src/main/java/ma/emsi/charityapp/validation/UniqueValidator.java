@@ -2,6 +2,7 @@ package ma.emsi.charityapp.validation;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
+import ma.emsi.charityapp.entities.CharityAction;
 import ma.emsi.charityapp.entities.RegularUser;
 import ma.emsi.charityapp.entities.Users;
 import org.slf4j.Logger;
@@ -39,7 +40,7 @@ public class UniqueValidator implements ConstraintValidator<Unique, Object> {
         logger.debug("Validating {} for value: {}", fieldName, value);
 
         try {
-            if (entity.equals(Users.class)) {
+            if (entity.equals(Users.class) || entity.equals(CharityAction.class)) {
                 return checkUserUniqueness(value, context);
             }
             return true;

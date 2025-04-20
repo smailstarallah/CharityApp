@@ -1,5 +1,6 @@
 package ma.emsi.charityapp.services;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import ma.emsi.charityapp.Enum.OrganizationStatus;
 import ma.emsi.charityapp.entities.Organization;
@@ -9,15 +10,22 @@ import ma.emsi.charityapp.repositories.SuperAdminRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
 
+import java.util.HashSet;
 import java.util.List;
 
 @Service
 @Transactional
 public class SuperAdminServiceImpl implements SuperAdminService {
 
-    @Autowired
     SuperAdminRepository superAdminRepository;
+    OrganizationService organizationService;
+
+    public SuperAdminServiceImpl(SuperAdminRepository superAdminRepository, OrganizationService organizationService) {
+        this.superAdminRepository = superAdminRepository;
+        this.organizationService = organizationService;
+    }
 
     @Override
     public SuperAdmin save(SuperAdmin superAdmin) {
@@ -74,10 +82,14 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     @Override
-    public void approveOrganization(Organization organization) {
-        if (organization == null) {
-            throw new IllegalArgumentException("L'organisation est nulle.");
+    @Transactional
+    public void approveOrganization( Long id, Long orgId) {
+        if (id == null || orgId == null || id <= 0 || orgId <= 0) {
+            throw new IllegalArgumentException("ID ne doit pas être null.");
         }
+        Organization organization = organizationService.findById(orgId).orElseThrow(() -> new EntityNotFoundException("Organization not found"));
+        SuperAdmin superAdmin = superAdminRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("SuperAdmin not found"));
         organization.setStatus(OrganizationStatus.Approved);
+        organization.setSuperAdmin(superAdmin);
     }
 }
