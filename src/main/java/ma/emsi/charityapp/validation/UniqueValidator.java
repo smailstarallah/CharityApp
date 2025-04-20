@@ -3,7 +3,6 @@ package ma.emsi.charityapp.validation;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import ma.emsi.charityapp.entities.CharityAction;
-import ma.emsi.charityapp.entities.RegularUser;
 import ma.emsi.charityapp.entities.Users;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

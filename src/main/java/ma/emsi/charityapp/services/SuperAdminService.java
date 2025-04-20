@@ -1,8 +1,6 @@
 package ma.emsi.charityapp.services;
 
-import ma.emsi.charityapp.entities.Organization;
 import ma.emsi.charityapp.entities.SuperAdmin;
-import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 

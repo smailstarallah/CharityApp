@@ -4,15 +4,11 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import ma.emsi.charityapp.Enum.OrganizationStatus;
 import ma.emsi.charityapp.entities.Organization;
-import ma.emsi.charityapp.entities.RegularUser;
 import ma.emsi.charityapp.entities.SuperAdmin;
 import ma.emsi.charityapp.repositories.SuperAdminRepository;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
 
-import java.util.HashSet;
 import java.util.List;
 
 @Service

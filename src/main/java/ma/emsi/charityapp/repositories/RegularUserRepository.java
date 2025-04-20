@@ -2,8 +2,8 @@ package ma.emsi.charityapp.repositories;
 
 
 import jakarta.transaction.Transactional;
+import jakarta.validation.constraints.NotNull;
 import ma.emsi.charityapp.Enum.UserType;
-import ma.emsi.charityapp.entities.CharityAction;
 import ma.emsi.charityapp.entities.Donation;
 import ma.emsi.charityapp.entities.RegularUser;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,12 +12,11 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
-import java.util.Optional;
 
 @Transactional
 public interface RegularUserRepository extends JpaRepository<RegularUser,Long> {
     RegularUser findByEmail(String email);
-    void deleteById(Long id);
+    void deleteById(@NotNull Long id);
     boolean existsByEmail(String email);
     boolean existsByTelephone(String telephone);
     @Query("SELECT d FROM Donation d WHERE d.rUser.Id = :id")

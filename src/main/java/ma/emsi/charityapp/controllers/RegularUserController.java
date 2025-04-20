@@ -1,6 +1,5 @@
 package ma.emsi.charityapp.controllers;
 
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import ma.emsi.charityapp.entities.CharityAction;
