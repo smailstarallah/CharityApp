@@ -1,6 +1,9 @@
 package ma.emsi.charityapp.entities;
 
 import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.EqualsAndHashCode;
+
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -8,9 +11,10 @@ import java.util.Set;
 @Entity
 @lombok.Data
 @lombok.NoArgsConstructor
+@DiscriminatorValue("SUPER_ADMIN")
+@EqualsAndHashCode(callSuper=false)
 public class SuperAdmin extends Users {
-    @Id @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long Id;
+    @JsonIgnore
     @OneToMany(mappedBy = "superAdmin")
     private Set<Organization> organizations;
 

@@ -31,6 +31,12 @@ public class Donation {
     @JoinColumn(name = "charity_action_id")
     private CharityAction charityAction;
 
+    public Donation(Double montante, RegularUser rUser, CharityAction charityAction) {
+        this.montante = montante;
+        this.rUser = rUser;
+        this.charityAction = charityAction;
+    }
+
     public String toString() {
         return "Donation{" +
                 "Id=" + Id +

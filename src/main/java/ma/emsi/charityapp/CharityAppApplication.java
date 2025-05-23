@@ -11,8 +11,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 
 @SpringBootApplication
-public class CharityAppApplication implements CommandLineRunner {
-    @Autowired
+public class CharityAppApplication /*implements CommandLineRunner */{
+   /* @Autowired
     RegularUserRepository regularUserRepository;
     @Autowired
     SuperAdminRepository superAdminRepository;
@@ -22,18 +22,20 @@ public class CharityAppApplication implements CommandLineRunner {
     OrganizationRepository organizationRepository;
     @Autowired
     CharityActionRepository charityActionRepository;
-
+*/
     public static void main(String[] args) {
         SpringApplication.run(CharityAppApplication.class, args);
     }
 
-    public void run(String... args) {
+
+   /* public void run(String... args) {
             regularUserRepository.save(new RegularUser("test", "test", "tesat@gmail.ma", "0634567891", new java.util.Date(), "test", UserType.REGULAR_USER));
             regularUserRepository.save(new RegularUser("test", "test", "yui@gmail.ma", "0600000098", new java.util.Date(), "test", UserType.REGULAR_USER));
             regularUserRepository.save(new RegularUser("test", "test", "taest@gmail.ma", "0623478987", new java.util.Date(), "test", UserType.REGULAR_USER));
             regularUserRepository.save(new RegularUser("test", "test", "ateastatest@gmail.ma", "0612456789", new java.util.Date(), "test", UserType.REGULAR_USER));
             superAdminRepository.save(new SuperAdmin("test", "test", "azer@gmail.ma", "0624567891", new java.util.Date(), "test"));
-            superAdminRepository.save(new SuperAdmin("test", "test", "aze@gmail.ma", "0624578912", new java.util.Date(), "test"));
+        superAdminRepository.save(new SuperAdmin("test", "test", "aze@gmail.ma", "0624578912", new java.util.Date(), "test"));
+        regularUserRepository.save(new RegularUser("test", "test", "aaze@gmail.ma", "0620978912", new java.util.Date(), "test", UserType.ADMIN));
 
         donationRepository.save(new Donation(null, 200.0, new java.util.Date(), regularUserRepository.findById(1L).get(), null));
         donationRepository.save(new Donation(null, 200.0, new java.util.Date(), regularUserRepository.findById(1L).get(), null));
@@ -55,5 +57,5 @@ public class CharityAppApplication implements CommandLineRunner {
         action.setOrganization(organizationRepository.findById(1L).get());
 
         charityActionRepository.save(action);
-    }
+    }*/
 }

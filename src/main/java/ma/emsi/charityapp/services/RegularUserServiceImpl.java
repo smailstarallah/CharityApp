@@ -1,19 +1,21 @@
 package ma.emsi.charityapp.services;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import ma.emsi.charityapp.Enum.UserType;
-import ma.emsi.charityapp.entities.CharityAction;
-import ma.emsi.charityapp.entities.Donation;
-import ma.emsi.charityapp.entities.Organization;
-import ma.emsi.charityapp.entities.RegularUser;
+import ma.emsi.charityapp.dto.OrganizationRegisterDTO;
+import ma.emsi.charityapp.entities.*;
+import ma.emsi.charityapp.repositories.MediaRepository;
+import ma.emsi.charityapp.Enum.MediaType;
 import ma.emsi.charityapp.repositories.OrganizationRepository;
 import ma.emsi.charityapp.repositories.RegularUserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 
@@ -22,24 +24,24 @@ public class RegularUserServiceImpl implements RegularUserService {
 
     private static final Logger logger = LoggerFactory.getLogger(RegularUserService.class);
 
-    private final OrganizationRepository organizationRepository;
-    RegularUserRepository regularUserRepository;
-    DonationService donationService;
-    CharityActionService charityActionService;
+    private final RegularUserRepository regularUserRepository;
+    private final DonationService donationService;
+    private final CharityActionService charityActionService;
+    private final OrganizationService organizationService;
+    private final MediaService mediaService;
 
     public RegularUserServiceImpl(RegularUserRepository regularUserRepository, DonationService donationService,
-                                  OrganizationRepository organizationRepository, CharityActionService charityActionService) {
+                                  OrganizationRepository organizationRepository, CharityActionService charityActionService, OrganizationService organizationService,  MediaService mediaService) {
         this.regularUserRepository = regularUserRepository;
         this.donationService = donationService;
-        this.organizationRepository = organizationRepository;
         this.charityActionService = charityActionService;
+        this.organizationService = organizationService;
+        this.mediaService = mediaService;
     }
 
     @Override
     public RegularUser save( RegularUser regularUser) {
-//        if (regularUserRepository.findByEmail(regularUser.getEmail()) != null) {
-//            throw new IllegalArgumentException("L'email existe déjà.");
-//        }
+        regularUser.setType(UserType.REGULAR_USER);
         regularUserRepository.save(regularUser);
         return regularUser;
     }
@@ -87,32 +89,36 @@ public class RegularUserServiceImpl implements RegularUserService {
     }
 
     @Override
-    public void makeDonation(Donation D) {
-        donationService.addDonation(D);
+    @Transactional(rollbackOn = Exception.class)
+    public Donation makeDonation(Donation donation) {
+
+        CharityAction charityAction = donation.getCharityAction();
+        //updateFondActuelById
+        double newFondActuel = charityAction.getFondsActuels() + donation.getMontante();
+        charityActionService.updateFondActuelById(newFondActuel, charityAction.getId());
+
+        return donationService.addDonation(donation);
     }
 
     @Override
-    public void registerOrganization(Long id, Organization org) {
+    public void registerOrganization(Long id, OrganizationRegisterDTO org, MultipartFile file) throws IOException {
         if (regularUserRepository.findById(id).get().getType() == UserType.REGULAR_USER) {
             regularUserRepository.updateType(id, UserType.ADMIN);
         }
         org.setRUser(regularUserRepository.findById(id).get());
-        organizationRepository.save(org);
+        organizationService.registreOrganization(org, file);
     }
 
     @Override
-    public Long registerCharityAction(Long userId, Long orgId, CharityAction charityAction) {
+    @Transactional
+    public Long registerCharityAction(Long userId, Long orgId, CharityAction charityAction, MultipartFile[] mediaFiles) throws IOException {
         logger.debug("Enregistrement d'une action caritative pour l'utilisateur ID={} et l'organisation ID={}", userId, orgId);
         if (userId == null || orgId == null || charityAction == null) {
             logger.error("Utilisateur, organisation ou action null");
             throw new IllegalArgumentException("L'utilisateur, l'organisation ou l'action caritative ne peut pas être null");
         }
 
-//        RegularUser user = regularUserRepository.findById(userId).orElseThrow(() -> {
-//            logger.error("Organisation avec l'ID {} non trouvée", orgId);
-//            return new EntityNotFoundException("Utilisateur non trouvé");
-//        });
-        Organization organization = organizationRepository.findById(orgId).orElseThrow(() -> {
+        Organization organization = organizationService.findById(orgId).orElseThrow(() -> {
             logger.error("Organisation avec l'ID {} non trouvée", orgId);
             return new EntityNotFoundException("Organisation non trouvée");
         });
@@ -126,8 +132,7 @@ public class RegularUserServiceImpl implements RegularUserService {
             logger.error("Erreur lors de la sauvegarde de l'action caritative: {}", e.getMessage(), e);
             throw new IllegalStateException("Impossible de sauvegarder l'action caritative: " + e.getMessage(), e);
         }
-//        user.setCharityAction(savedAction);
-        System.out.println(savedAction);
+
         if (charityActionService.existsById(charityAction.getId())) {
             logger.info("Action caritative enregistrée avec succès");
             regularUserRepository.updateCharityAction(userId, charityAction.getId());
@@ -135,18 +140,11 @@ public class RegularUserServiceImpl implements RegularUserService {
             logger.error("Erreur lors de l'enregistrement de l'action caritative");
         }
         logger.debug("Utilisateur avant sauvegarde: id={}, charityActionId={}", userId, savedAction.getId());
+
+        mediaService.saveMedia(mediaFiles, charityAction);
+
+        regularUserRepository.updateCharityAction(userId, charityAction.getId());
         return charityAction.getId();
-//        try {
-//            RegularUser updatedUser = regularUserRepository.save(user);
-//            logger.info("Action caritative enregistrée pour l'utilisateur ID={}", userId);
-//            return updatedUser;
-//        } catch (DataIntegrityViolationException e) {
-//            logger.error("Erreur de contrainte lors de l'enregistrement de l'action caritative pour l'utilisateur ID={}: {}", userId, e.getMessage());
-//            throw new IllegalStateException("Impossible d'enregistrer l'action caritative en raison d'une violation de contrainte", e);
-//        }catch (Exception e) {
-//            logger.error("Erreur inattendue lors de l'enregistrement de l'utilisateur ID={}: {}", userId, e.getMessage(), e);
-//            throw new IllegalStateException("Erreur inattendue lors de l'enregistrement de l'action caritative: " + e.getMessage(), e);
-//        }
     }
 
 

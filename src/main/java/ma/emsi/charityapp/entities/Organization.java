@@ -5,7 +5,10 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.EqualsAndHashCode;
 import ma.emsi.charityapp.Enum.OrganizationStatus;
+import org.hibernate.annotations.CreationTimestamp;
 
+import java.util.Date;
+import java.util.HashMap;
 import java.util.Set;
 
 @Entity
@@ -23,9 +26,13 @@ public class Organization {
     private String identifiantFiscal;
     @NotNull
     private String contactPrincipal;
-    private String logo;
+    private String paypalEmail;
+    @Lob
+    private byte[] logo;
     private String missionDescription;
     private OrganizationStatus status;
+    @CreationTimestamp
+    private Date date;
     @ManyToOne
     @JoinColumn(name = "regular_user_id")
     @JsonIgnore
@@ -46,12 +53,15 @@ public class Organization {
                 ", adresseLegale='" + adresseLegale + '\'' +
                 ", identifiantFiscal='" + identifiantFiscal + '\'' +
                 ", contactPrincipal='" + contactPrincipal + '\'' +
-                ", logo='" + logo + '\'' +
                 ", missionDescription='" + missionDescription + '\'' +
                 ", status=" + status +
                 ", rUser=" + (rUser != null ? rUser.getId() : null) +
                 ", superAdmin=" + ( superAdmin != null ? superAdmin.getId() : null) +
-                ", charityActions=" + (charityActions != null ? charityActions.stream().map(CharityAction::getId).toList() : "null") +
+                ", charityActions=" + (charityActions != null ?
+                charityActions.stream()
+                        .map(c -> { HashMap<Long, String> map = new HashMap<>(); map.put(c.getId(), c.getTitre()); return map; })
+                        .toList()
+                : "null") +
                 '}';
     }
 }

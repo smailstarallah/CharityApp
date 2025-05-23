@@ -60,8 +60,8 @@ public class SuperAdminController {
 //    }
 
     @PostMapping("/save")
-    SuperAdmin save(@Valid @RequestBody SuperAdmin regularUser) {
-        return superAdminService.save(regularUser);
+    SuperAdmin save(@Valid @RequestBody SuperAdmin user) {
+        return superAdminService.save(user);
     }
 
     @PutMapping("/update/{id}")

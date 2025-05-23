@@ -19,7 +19,6 @@ public class CharityAction {
     @Id @GeneratedValue(strategy = GenerationType.AUTO)
     private Long Id;
     @NotBlank(message = "Le titre est obligatoire")
-    @Unique(fieldName = "titre", entity = CharityAction.class, message = "Le titre doit être unique")
     @Column(nullable = false, unique = true)
     private String titre;
     @Column(nullable = false)
@@ -28,18 +27,19 @@ public class CharityAction {
     @Column(nullable = false)
     @CreationTimestamp
     private Date date;
+    private Date dateDebut;
     @Column(nullable = false)
     @NotBlank(message = "La Localisation de début est obligatoire")
     private String localisation;
     @NotNull(message = "L'objectif de l'action est obligatoire")
+    @Column(nullable = false)
     private Double objectifDeFinancement;
     private Double fondsActuels;
     private String categorie;
     @OneToMany
-    @JsonIgnore
+    @EqualsAndHashCode.Exclude
     private Set<Media> media;
     @OneToMany
-    @JsonIgnore
     @EqualsAndHashCode.Exclude
     private Set<Donation> donations;
     @OneToMany
@@ -65,7 +65,7 @@ public class CharityAction {
                 ", Categorie='" + categorie + '\'' +
                 ", media=" + (media != null ? media.stream().map(Media::getId).toList() : "null") +
                 ", donations=" + (donations != null ? donations.stream().map(Donation::getId).toList() : "null") +
-//                ", organization=" + organization.getNom() +
+                ", organization=" + organization.getNom() +
 //                ", participants=" + participants.stream().map(RegularUser::getId).toString() +
                 '}';
     }
