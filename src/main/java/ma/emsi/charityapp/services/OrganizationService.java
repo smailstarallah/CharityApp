@@ -1,6 +1,7 @@
 package ma.emsi.charityapp.services;
 
 
+import ma.emsi.charityapp.Enum.OrganizationStatus;
 import ma.emsi.charityapp.dto.OrganizationRegisterDTO;
 import ma.emsi.charityapp.entities.Organization;
 import ma.emsi.charityapp.entities.RegularUser;
@@ -22,4 +23,5 @@ public interface OrganizationService {
     boolean existsByContactPrincipal(String contactPrincipal);
     List<Organization> findOrganizationByUser(RegularUser User);
     Organization addMissionDescription(Long id, String missionDescription);
+    List<Organization> findAllByStatus(OrganizationStatus status);
 }

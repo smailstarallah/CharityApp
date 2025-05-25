@@ -4,7 +4,9 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.InvalidKeyException;
 import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
 import ma.emsi.charityapp.repositories.RegularUserRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,6 +21,7 @@ import java.util.function.Function;
 /**
  * Implémentation du service de gestion des tokens JWT.
  */
+@Slf4j
 @Service
 public class JwtTokenServiceImpl implements JwtTokenService {
 
@@ -32,9 +35,11 @@ public class JwtTokenServiceImpl implements JwtTokenService {
     private long refreshExpiration;
 
     final RegularUserRepository userRepository;
+    final SuperAdminService superAdminService;
 
-    public JwtTokenServiceImpl(RegularUserRepository userRepository) {
+    public JwtTokenServiceImpl(RegularUserRepository userRepository, SuperAdminService superAdminService) {
         this.userRepository = userRepository;
+        this.superAdminService = superAdminService;
     }
 
     // Génère une clé de signature à partir du secret
@@ -109,13 +114,31 @@ public class JwtTokenServiceImpl implements JwtTokenService {
 
     // Créer le token JWT
     private String createToken(Map<String, Object> claims, String subject, long expiration) {
+        try {
+            String role = userRepository.findByEmail(subject).getType().toString();
+            if (role != null) {
+                return Jwts.builder()
+                        .setClaims(claims)
+                        .setSubject(subject)
+                        .setIssuedAt(new Date(System.currentTimeMillis()))
+                        .setExpiration(new Date(System.currentTimeMillis() + expiration))
+                        .claim("AccessRole", "REGULAR_USER")
+                        .claim("Role", userRepository.findByEmail(subject).getType().toString())
+                        .claim("Id", userRepository.findByEmail(subject).getId())
+                        .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                        .compact();
+            }
+        } catch (Exception e) {
+            System.out.println("il y'a exception");
+        }
+        log.error("Erreur lors de la création du token JWT :");
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(subject)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
-                .claim("Role", userRepository.findByEmail(subject).getType().toString())
-                .claim("Id", userRepository.findByEmail(subject).getId())
+                .claim("AccessRole", "SUPER_ADMIN")
+                .claim("Id", superAdminService.findByEmail(subject).getId())
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -144,4 +167,16 @@ public class JwtTokenServiceImpl implements JwtTokenService {
             return false;
         }
     }
+
+    /**
+     * Extrait le rôle d'accès (AccessRole) du token JWT
+     *
+     * @param token Le token JWT
+     * @return Le rôle d'accès extrait
+     */
+    @Override
+    public String extractAccessRole(String token) {
+        return extractClaim(token, claims -> claims.get("AccessRole", String.class));
+    }
 }
+

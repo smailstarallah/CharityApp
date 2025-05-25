@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -41,38 +42,48 @@ public class AuthenticationController {
      * Accepte username et password, retourne un token JWT si l'authentification réussit
      */
     @PostMapping("/login")
-    public ResponseEntity<?> authenticateUser(@RequestBody Map<String, String> loginRequest) {
-        logger.debug("Tentative d'authentification pour l'utilisateur: {}", loginRequest.get("username"));
-
+    public ResponseEntity<?> authenticateUser(@RequestBody Map<String, String> loginRequest, HttpServletRequest request) {
         try {
-            logger.debug("Authentification via AuthenticationManager...");
-            // Authentifie l'utilisateur avec Spring Security
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
                             loginRequest.get("username"),
                             loginRequest.get("password")
                     )
             );
-            logger.info("Authentification réussie pour l'utilisateur: {}", loginRequest.get("username"));
 
-            // Si l'authentification réussit, génère un token JWT
-            logger.debug("Chargement des détails utilisateur...");
             final UserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.get("username"));
-            logger.debug("Génération du token JWT...");
             final String token = jwtTokenService.generateToken(userDetails);
-            logger.debug("Token JWT généré avec succès");
 
-            // Renvoie le token au client
+            // Vérifier le rôle d'accès après la génération du token
+            String accessRole = jwtTokenService.extractAccessRole(token);
+            logger.info("Access Role: {}", accessRole);
+
+            // Vérifier l'origine de la requête
+            String origin = request.getHeader("Origin");
+            logger.info("Request Origin: {}", origin);
+
+            int port = request.getServerPort();
+            String expectedOrigin = request.getScheme() + "://" + request.getServerName() + (port == 80 || port == 443 ? "" : ":" + port);
+            boolean isSameOrigin = (origin == null || origin.equals(expectedOrigin));
+
+            if (isSameOrigin && "SUPER_ADMIN".equalsIgnoreCase(accessRole)) {
+                // Connexion autorisée pour super admin depuis la même origine
+            } else if (!isSameOrigin && "REGULAR_USER".equalsIgnoreCase(accessRole)) {
+                // Connexion autorisée pour regular user depuis une autre origine
+            } else {
+                logger.warn("Accès refusé : combinaison origine/rôle non autorisée");
+                return ResponseEntity.status(403).body(Map.of("error", "Accès refusé : combinaison origine/rôle non autorisée"));
+            }
+
             Map<String, String> response = new HashMap<>();
             response.put("token", token);
             response.put("username", userDetails.getUsername());
 
-            logger.info("Connexion réussie et token envoyé pour: {}", userDetails.getUsername());
+            logger.info("Authentification réussie pour l'utilisateur: {}", loginRequest.get("username"));
             return ResponseEntity.ok(response);
 
         } catch (BadCredentialsException e) {
-            // En cas d'échec d'authentification
-            logger.warn("Échec d'authentification pour l'utilisateur: {} - Identifiants invalides", loginRequest.get("username"));
+            logger.error("Échec d'authentification pour l'utilisateur: {} - Identifiants invalides", loginRequest.get("username"));
             Map<String, String> response = new HashMap<>();
             response.put("error", "Identifiants invalides");
             return ResponseEntity.status(401).body(response);
@@ -107,3 +118,4 @@ public class AuthenticationController {
         return ResponseEntity.ok(response);
     }
 }
+

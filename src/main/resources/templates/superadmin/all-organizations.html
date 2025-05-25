@@ -1,0 +1,73 @@
+<html lang="fr">
+<head>
+    <title>Toutes les Organisations</title>
+    <script src="/scripts/auth.js"></script>
+</head>
+<body onload="requireAuth()">
+    <h1>Liste de toutes les organisations</h1>
+    <button onclick="logout()">Logout</button>
+    <table style="border: 1px solid black;">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nom</th>
+                <th>Statut</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="organization : ${allOrganizations}">
+                <td th:text="${organization.id}"></td>
+                <td th:text="${organization.nom}"></td>
+                <td th:text="${organization.status}"></td>
+                <td>
+                    <button th:onclick="|handleAction('/api/superadmin/approve-organization/' + ${organization.id})|">Approuver</button>
+                    <button th:onclick="|handleAction('/api/superadmin/reject-organization/' + ${organization.id})|">Rejeter</button>
+                    <button th:onclick="|handleAction('/api/superadmin/delete-organization/' + ${organization.id})|">Supprimer</button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <script>
+        function logout() {
+            localStorage.removeItem('jwtToken');
+            window.location.href = '/api/superadmin/login';
+        }
+
+        async function handleAction(url) {
+            try {
+                console.log('URL utilisée pour la requête :', url);
+                const response = await fetchWithAuth(url, { method: 'POST' });
+                console.log('Statut de la réponse :', response.status);
+
+                if (response.ok) {
+                    alert('Action effectuée avec succès.');
+                    window.location.reload(); // Recharger la page pour refléter les changements
+                } else {
+                    const error = await response.json();
+                    console.error('Erreur du serveur :', error);
+                    alert(error.error || 'Une erreur est survenue.');
+                }
+            } catch (e) {
+                console.error('Erreur lors de la connexion au serveur :', e);
+                alert('Erreur lors de la connexion au serveur.');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('jwtToken');
+            if (token) {
+                const header = document.querySelector('header');
+                if (header) {
+                    const tokenDisplay = document.createElement('div');
+                    tokenDisplay.textContent = `Token: ${token}`;
+                    tokenDisplay.style.fontSize = '12px';
+                    tokenDisplay.style.color = 'gray';
+                    header.appendChild(tokenDisplay);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
+

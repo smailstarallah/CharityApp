@@ -26,19 +26,18 @@ import java.util.Map;
 @RequestMapping("/api/donations")
 public class DonationController {
 
-    @Autowired
     private PayPalService payPalService;
-    @Autowired
     RegularUserController regularUserController;
-    @Autowired
     DonationService donationService;
-    @Autowired
     private RegularUserService regularUserService;
-    @Autowired
     private CharityActionService charityActionService;
 
-    public DonationController (DonationService donationService) {
+    public DonationController(PayPalService payPalService, RegularUserController regularUserController, DonationService donationService, RegularUserService regularUserService, CharityActionService charityActionService) {
+        this.payPalService = payPalService;
+        this.regularUserController = regularUserController;
         this.donationService = donationService;
+        this.regularUserService = regularUserService;
+        this.charityActionService = charityActionService;
     }
 
     @PostMapping("/add")
@@ -55,9 +54,6 @@ public class DonationController {
     @PostMapping("/create")
     public ResponseEntity<?> createDonation(@RequestBody CreateDonationRequest request) {
         log.info("Creating donation with amount: {}", request.getAmount());
-        log.info("Creating donation with currency: {}", request.getCurrency());
-        log.info("Creating donation with charityId: {}", request.getCharityId());
-        log.info("Creating donation with userId: {}", request.getUserId());
 
         try {
             Payment payment = payPalService.createPayment(request);

@@ -78,14 +78,20 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     @Override
-    @Transactional
-    public void approveOrganization( Long id, Long orgId) {
-        if (id == null || orgId == null || id <= 0 || orgId <= 0) {
+    public void approveOrganization( Long orgId) {
+        if (orgId == null || orgId <= 0) {
             throw new IllegalArgumentException("ID ne doit pas être null.");
         }
         Organization organization = organizationService.findById(orgId).orElseThrow(() -> new EntityNotFoundException("Organization not found"));
-        SuperAdmin superAdmin = superAdminRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("SuperAdmin not found"));
         organization.setStatus(OrganizationStatus.Approved);
-        organization.setSuperAdmin(superAdmin);
+    }
+
+    @Override
+    public void rejectOrganization( Long orgId) {
+        if (orgId == null || orgId <= 0) {
+            throw new IllegalArgumentException("ID ne doit pas être null.");
+        }
+        Organization organization = organizationService.findById(orgId).orElseThrow(() -> new EntityNotFoundException("Organization not found"));
+        organization.setStatus(OrganizationStatus.Rejected);
     }
 }

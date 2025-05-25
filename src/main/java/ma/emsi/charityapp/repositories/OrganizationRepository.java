@@ -1,6 +1,7 @@
 package ma.emsi.charityapp.repositories;
 
 import jakarta.transaction.Transactional;
+import ma.emsi.charityapp.Enum.OrganizationStatus;
 import ma.emsi.charityapp.entities.Organization;
 import ma.emsi.charityapp.entities.RegularUser;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -18,4 +19,6 @@ public interface OrganizationRepository extends JpaRepository<Organization, Long
     @Query("SELECT o FROM Organization o WHERE o.rUser = ?1")
     List<Organization> findByRUser(RegularUser rUser);
     Organization findByAdresseLegale(String adresseLegale);
+
+    List<Organization> findAllByStatus(OrganizationStatus status);
 }

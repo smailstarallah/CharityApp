@@ -35,6 +35,14 @@ public interface JwtTokenService {
     <T> T extractClaim(String token, Function<Claims, T> claimsResolver);
 
     /**
+     * Extrait le rôle d'accès (AccessRole) du token JWT
+     *
+     * @param token Le token JWT
+     * @return Le rôle d'accès extrait
+     */
+    String extractAccessRole(String token);
+
+    /**
      * Génère un token JWT pour un utilisateur
      *
      * @param userDetails Les détails de l'utilisateur

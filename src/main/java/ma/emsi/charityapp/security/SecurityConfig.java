@@ -66,15 +66,21 @@ public class SecurityConfig {
                         // Routes publiques, accessibles sans authentification
                         .requestMatchers(
                                 "/api/auth/**",
+                                "/scripts/**",
+                                "/api/regularusers/getcharityAction/**",
                                 "/api/public/**",
                                 "/api/regularusers/getallcharites",
                                 "/api/user-actions/getall",
-                                "/ api/regularusers/save", // J'ai gardé ce chemin tel quel, vérifiez s'il doit commencer par "/"
+                                "/api/superadmin/login",
+                                "/api/superadmin/save",
+                                "/api/superadmin/all-organizations",
+                                "/api/superadmin/register", // J'ai gardé ce chemin tel quel, vérifiez s'il doit commencer par "/"
+                                "/api/regularusers/save", // J'ai gardé ce chemin tel quel, vérifiez s'il doit commencer par "/"
                                 // Swagger UI v3 (OpenAPI)
                                 "/v3/api-docs/**",      // Ajouté pour la spécification OpenAPI
                                 "/swagger-ui/**",       // Déjà présent, pour les ressources UI
                                 "/swagger-ui.html",
-                                "/api/organizations"// Ajouté pour la page principale de Swagger UI
+                                "/api/organizations/all"// Ajouté pour la page principale de Swagger UI
                         ).permitAll()
                         // Routes réservées à l'administrateur du site
                         .requestMatchers("/api/site-admin/**").hasAuthority("ROLE_SITE_ADMIN")

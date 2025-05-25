@@ -136,4 +136,9 @@ public class OrganizationServiceImpl implements OrganizationService {
         organization.setMissionDescription(missionDescription);
         return organizationRepository.save(organization);
     }
+
+    @Override
+    public List<Organization> findAllByStatus(OrganizationStatus status) {
+        return organizationRepository.findAllByStatus(status);
+    }
 }

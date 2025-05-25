@@ -4,6 +4,7 @@ package ma.emsi.charityapp.controllers;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import ma.emsi.charityapp.Enum.OrganizationStatus;
 import ma.emsi.charityapp.dto.MissionDescriptionRequest;
 import ma.emsi.charityapp.entities.Organization;
 import ma.emsi.charityapp.services.OrganizationService;
@@ -13,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -26,10 +28,24 @@ public class OrganizationController {
     }
 
     @GetMapping("")
-    public ResponseEntity<List<Organization>> getAllOrganizations() {
+    public ResponseEntity<List<Organization>> getAllApprovedOrganizations() {
         try {
             log.info("Fetching all organizations ");
             return ResponseEntity.ok(organizationService.getAllOrganizations());
+        } catch (Exception e) {
+            log.error("Error fetching organizations: {}", e.getMessage());
+            return ResponseEntity.status(500).build();
+        }
+    }
+    @GetMapping("/all")
+    public ResponseEntity<List<Organization>> getAllOrganizations() {
+        try {
+            log.info("Fetching all organizations ");
+            List<Organization> organizations = organizationService.getAllOrganizations();
+            List<Organization> approvedOrganizations = organizations.stream()
+                    .filter(org -> org.getStatus() == OrganizationStatus.Approved)
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(approvedOrganizations);
         } catch (Exception e) {
             log.error("Error fetching organizations: {}", e.getMessage());
             return ResponseEntity.status(500).build();

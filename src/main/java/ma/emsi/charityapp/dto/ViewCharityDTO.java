@@ -25,6 +25,7 @@ public class ViewCharityDTO {
     private String contactPrincipalOrg;
     private String adresse;
     private byte[] logo;
+    private Long orgId;
 
     public ViewCharityDTO(CharityAction charityAction) {
         this.titre = charityAction.getTitre();
@@ -41,6 +42,7 @@ public class ViewCharityDTO {
             this.contactPrincipalOrg = org.getContactPrincipal();
             this.adresse = org.getAdresseLegale();
             this.logo = org.getLogo();
+            this.orgId = org.getId();
         }
     }
 }

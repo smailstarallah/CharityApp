@@ -292,7 +292,6 @@ public class RegularUserController {
             return ResponseEntity.notFound().build();
         }
         ViewCharityDTO viewCharityDTO = new ViewCharityDTO(charityAction);
-        logger.info("charite vaction: {}", viewCharityDTO);
         return ResponseEntity.ok(viewCharityDTO);
     }
 

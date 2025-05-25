@@ -53,8 +53,8 @@ public class PayPalServiceImpl implements PayPalService {
         payment.setTransactions(transactions);
 
         RedirectUrls redirectUrls = new RedirectUrls();
-        redirectUrls.setCancelUrl("http://localhost:3000/donation/cancel");
-        redirectUrls.setReturnUrl("http://localhost:3000/donation/success?userId=" + request.getUserId() + "&orgId=" + charityActionRepository.findById(request.getCharityId()).get().getOrganization() + "&amount=" + request.getAmount());
+        redirectUrls.setCancelUrl("http://localhost:5173/donation/cancel");
+        redirectUrls.setReturnUrl("http://localhost:5173/donation/success?userId=" + request.getUserId() + "&orgId=" + charityActionRepository.findById(request.getCharityId()).get().getOrganization().getId() + "&amount=" + request.getAmount());
         payment.setRedirectUrls(redirectUrls);
 
         return payment.create(apiContext);

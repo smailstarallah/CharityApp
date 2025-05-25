@@ -1,35 +1,37 @@
 package ma.emsi.charityapp.controllers;
 
 
-import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
-import ma.emsi.charityapp.Enum.OrganizationStatus;
+import ma.emsi.charityapp.entities.Organization;
 import ma.emsi.charityapp.entities.SuperAdmin;
 import ma.emsi.charityapp.services.OrganizationService;
 import ma.emsi.charityapp.services.SuperAdminService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
-@RestController
+@Controller
 @RequestMapping("/api/superadmin")
 public class SuperAdminController {
 
     private final OrganizationService organizationService;
     SuperAdminService superAdminService;
+    private final PasswordEncoder passwordEncoder;
 
-    public SuperAdminController(SuperAdminService superAdminService, OrganizationService organizationService) {
+    public SuperAdminController(SuperAdminService superAdminService, OrganizationService organizationService, PasswordEncoder passwordEncoder) {
         this.superAdminService = superAdminService;
         this.organizationService = organizationService;
+        this.passwordEncoder = passwordEncoder;
     }
 
-    @GetMapping("")
-    List<SuperAdmin> getAll() {
-        return superAdminService.getAll();
-    }
-
-    @GetMapping("/{id}")
+    @GetMapping("/id/{id}")
     SuperAdmin getById(@PathVariable Long id) {
         return superAdminService.findById(id);
     }
@@ -52,16 +54,16 @@ public class SuperAdminController {
         }
     }
 
-//    @PostMapping("/save")
-//    SuperAdmin save(@Valid @RequestBody SuperAdmin superAdmin) {
-////        int random = (int) (Math.random() * 10000000);
-////        SuperAdmin superAdmin = new SuperAdmin("a", "a", "aaaa"+ (char)(random % 100) + ( (char) (int) (Math.random() * 100))  , random, new java.util.Date(1999, 4, 12), "a");
-//        return superAdminService.save(superAdmin);
-//    }
-
+    @ResponseBody
     @PostMapping("/save")
-    SuperAdmin save(@Valid @RequestBody SuperAdmin user) {
-        return superAdminService.save(user);
+    public ResponseEntity<SuperAdmin> save(@Valid @RequestBody SuperAdmin user) {
+        try {
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
+            SuperAdmin savedUser = superAdminService.save(user);
+            return ResponseEntity.status(HttpStatus.CREATED).body(savedUser);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     @PutMapping("/update/{id}")
@@ -69,16 +71,61 @@ public class SuperAdminController {
         return superAdminService.update(id, superAdmin);
     }
 
-    @PutMapping("/update/{id}/approve/{orgId}")
-    @Transactional
-    String approveOrganization(@PathVariable Long id, @PathVariable Long orgId) {
-        if (organizationService.findById(orgId).get().getStatus() == OrganizationStatus.Approved) {
-            return "already approved";
+    @PostMapping("/approve-organization/{orgId}")
+    String approveOrganization(@PathVariable Long orgId, RedirectAttributes redirectAttributes) {
+        if (organizationService.findById(orgId).isEmpty()) {
+            redirectAttributes.addFlashAttribute("error", "Organization not found");
+            return "redirect:/api/superadmin/all-organizations";
         }
-        if(id == null || orgId == null || id <= 0 || orgId <= 0) {
-            return "id or orgId cannot be null";
+        superAdminService.approveOrganization(orgId);
+        redirectAttributes.addFlashAttribute("success", "Organization approved successfully");
+        return "redirect:/api/superadmin/all-organizations";
+    }
+
+    @PostMapping("/reject-organization/{orgId}")
+    String rejectOrganization(@PathVariable Long orgId, RedirectAttributes redirectAttributes) {
+        if (organizationService.findById(orgId).isEmpty()) {
+            redirectAttributes.addFlashAttribute("error", "Organization not found");
+            return "redirect:/api/superadmin/all-organizations";
         }
-        superAdminService.approveOrganization(id, orgId);
-        return "done";
+        superAdminService.rejectOrganization(orgId);
+        redirectAttributes.addFlashAttribute("success", "Organization rejected successfully");
+        return "redirect:/api/superadmin/all-organizations";
+    }
+
+    @GetMapping("/all-organizations")
+    String getAllOrganizations(Model model) {
+        List<Organization> allOrganizations = organizationService.getAllOrganizations();
+        model.addAttribute("allOrganizations", allOrganizations);
+        return "superadmin/all-organizations";
+    }
+
+    @PostMapping("/delete-organization/{orgId}")
+    String deleteOrganization(@PathVariable Long orgId, RedirectAttributes redirectAttributes) {
+        if (organizationService.findById(orgId).isEmpty()) {
+            redirectAttributes.addFlashAttribute("error", "Organization not found");
+            return "redirect:/api/superadmin/all-organizations";
+        }
+        organizationService.deleteOrganization(orgId);
+        redirectAttributes.addFlashAttribute("success", "Organization deleted successfully");
+        return "redirect:/api/superadmin/all-organizations";
+    }
+
+    @GetMapping("/login")
+    String loginPage() {
+        return "superadmin/login";
+    }
+
+    @GetMapping("/register")
+    String registerPage() {
+        return "superadmin/register";
+    }
+
+    @PostMapping("/register")
+    String registerPage(@Valid @RequestBody SuperAdmin user) {
+        superAdminService.save(user);
+        return "superadmin/register";
     }
 }
+
+

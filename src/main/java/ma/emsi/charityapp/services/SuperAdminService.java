@@ -11,5 +11,6 @@ public interface SuperAdminService {
     SuperAdmin update(Long id, SuperAdmin superAdmin);
     SuperAdmin findByEmail(String email);
     List<SuperAdmin> getAll();
-    void approveOrganization( Long id, Long orgId);
+    void approveOrganization(Long orgId);
+    public void rejectOrganization( Long orgId);
 }
